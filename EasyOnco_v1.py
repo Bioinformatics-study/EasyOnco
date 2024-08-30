@@ -116,7 +116,6 @@ def mkMAF(file, args, path) :
                         tmp.loc[tmp.index[i], 'Variant_Classification'] = 'In_Frame_Ins'
             
             elif 'dup' in tmp['HGVSc'].iloc[i] :
-                # Chromosomal -> Structure_variant로 정의해야하는지 -> 그렇다면 deletion 길이 보고 특정 길이를 넘어서면 그것도 Structure_variant로 따로 분류해야하는 건 아닌지 + 교수님 파이프라인이 SNV랑 INDEL만 볼 수 있는거면 inversion뿐만 아니라 dup도 관찰할 수 없어야하는 거 아닌지..? dup 결과가 나왔다면 확인은 하지 못했지만 inv도 존재할 가능성..?
                 tmp.loc[tmp.index[i], 'Variant_Type'] = 'INS' 
                 tmp.loc[tmp.index[i], 'Variant_Classification'] = 'Duplication'
                 
@@ -127,14 +126,15 @@ def mkMAF(file, args, path) :
         tmp = tmp[['Hugo_Symbol','Chromosome','Start_Position','End_Position','Reference_Allele','Tumor_Seq_Allele2','Variant_Classification','Variant_Type','Tumor_Sample_Barcode','Protein_Change','i_TumorVAF_WU','i_transcript_name']]
         MAF = pd.concat([MAF, tmp], axis=0, ignore_index=True)
     # MAF.to_excel(f'{path}/OnGo.xlsx',index = False)
-    MAF.to_csv(f'{path}/EasyOnco.maf', index = False, sep ='\t')
+    MAF.to_csv(f'{path}/{args.output}', index = False, sep ='\t')
 #----------------------------------------------------------------------------------------#
 def run() : 
     warnings.simplefilter(action='ignore', category=FutureWarning)
     parser = argparse.ArgumentParser(description='OnGoPlotter Usage')
     parser.add_argument("-i", "--input", dest = "input", action = "store", nargs='+')
-    parser.add_argument("-f", "--selected_filter", dest = "filter", action = "store", nargs='+', type = str, default=['v'])
+    parser.add_argument("-f", "--selected_filter", dest = "filter", action = "store", nargs='+', type = str, default = ['v'])
     parser.add_argument("-s","--sheet", dest = "sheets", action = "store", nargs='+', choices=['P','A'], required = True, help='Pathogenic.VUS(P),All.Variants(A)')
+    parser.add_argument("-o","--output", dest = "output", action = "store", default = 'EasyOnco.maf')
     args = parser.parse_args()
     path = os.getcwd()
     args.sheets = list(map(transform_args, args.sheets))
@@ -143,7 +143,8 @@ def run() :
     for File in args.input :
         mkMAF(File, args, path)
 
-    command = 'Rscript ../Oncoplotter_v1.R'
+    #####!!!!!!!#####
+    command = f'Rscript ../Oncoplotter_v1.R {args.output}'
     os.system(command)
 #----------------------------------------------------------------------------------------#
 if __name__ == '__main__' : 

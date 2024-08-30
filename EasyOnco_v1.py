@@ -143,7 +143,7 @@ def run() :
     for File in args.input :
         mkMAF(File, args, path)
 
-    command = 'Rscript /labmed/00.Code/EasyOnco/Oncoplotter_v1.R'
+    command = 'Rscript ../Oncoplotter_v1.R'
     os.system(command)
 #----------------------------------------------------------------------------------------#
 if __name__ == '__main__' : 

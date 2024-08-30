@@ -31,7 +31,7 @@ if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   write.mafSummary(maf = Onco, basename = 'Onco')
   #------------------------------------------------------------------------------#
-  options_df <- read_excel("/labmed/00.Code/EasyOnco/oncoplot_options_v1.xlsx", col_names = TRUE)
+  options_df <- read_excel("../oncoplot_options_v1.xlsx", col_names = TRUE)
   options_list <- setNames(as.list(options_df$Value), options_df$Options)
   get_option <- function(option_name) {
     return(options_list[[option_name]])
@@ -243,7 +243,7 @@ if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   write.mafSummary(maf = Onco, basename = 'Onco')
   #------------------------------------------------------------------------------#
-  options_df <- read_excel("/labmed/00.Code/EasyOnco/oncoplot_options_v1.xlsx", col_names = TRUE)
+  options_df <- read_excel("../oncoplot_options_v1.xlsx", col_names = TRUE)
   options_list <- setNames(as.list(options_df$Value), options_df$Options)
   get_option <- function(option_name) {
     return(options_list[[option_name]])

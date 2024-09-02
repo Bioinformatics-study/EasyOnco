@@ -13,7 +13,7 @@ def transform_args(value) :
     if value in mapping :
         return mapping[value]
     else : 
-cd        raise argparse.ArgumentTypeError(f"Invalid choice: {value} (choose from {list(mapping.keys())})")
+        raise argparse.ArgumentTypeError(f"Invalid choice: {value} (choose from {list(mapping.keys())})")
 #----------------------------------------------------------------------------------------#
 def mkMAF(file, args, path) :
     global MAF
@@ -143,7 +143,6 @@ def run() :
     for File in args.input :
         mkMAF(File, args, path)
 
-    #####!!!!!!!#####
     EasyOnco_path = str(__file__).split('/')[:-1]
     EasyOnco_path = '/'.join(EasyOnco_path)
     command = f'Rscript {EasyOnco_path}/Oncoplotter_v1.R {args.output}'

@@ -13,7 +13,7 @@ def transform_args(value) :
     if value in mapping :
         return mapping[value]
     else : 
-        raise argparse.ArgumentTypeError(f"Invalid choice: {value} (choose from {list(mapping.keys())})")
+cd        raise argparse.ArgumentTypeError(f"Invalid choice: {value} (choose from {list(mapping.keys())})")
 #----------------------------------------------------------------------------------------#
 def mkMAF(file, args, path) :
     global MAF

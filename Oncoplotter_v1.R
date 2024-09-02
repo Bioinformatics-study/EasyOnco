@@ -4,9 +4,13 @@ library(dplyr)
 library(scales)
 library(circlize)
 #------------------------------------------------------------------------------#
+args = commandArgs(trailingOnly = TRUE)
+output_file <- args[1]
+Name <- sub('.maf$','',output_file)
+#------------------------------------------------------------------------------#
 if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
-  maf <- read.table('EasyOnco.maf', sep='\t', header=T)
+  maf <- read.table(output_file, sep='\t', header=TRUE)
   Clinical_annotation <- read.table('Clinical_annotation.txt', sep='\t', header=T)
   current_date <- format(Sys.Date(), "%y%m%d")
   #------------------------------------------------------------------------------#
@@ -29,7 +33,8 @@ if (file.exists('Clinical_annotation.txt')){
                     vc_nonSyn = VariantClassification,
                     clinicalData = Clinical_annotation)
   #------------------------------------------------------------------------------#
-  write.mafSummary(maf = Onco, basename = 'Onco')
+  output_name <- paste0(Name, "Onco")
+  write.mafSummary(maf = Onco, basename = output_name)
   #------------------------------------------------------------------------------#
   options_df <- read_excel("../oncoplot_options_v1.xlsx", col_names = TRUE)
   options_list <- setNames(as.list(options_df$Value), options_df$Options)
@@ -149,13 +154,13 @@ if (file.exists('Clinical_annotation.txt')){
   GeneCut <- length(Oncogenes)
   #------------------------------------------------------------------------------#
   Onco.titv = titv(maf = Onco, plot = FALSE, useSyn = TRUE)
-  oncotitiv_filename <- paste0(current_date, "_onco.titv.pdf")
+  oncotitiv_filename <- paste0(current_date,"_",Name, "_onco.titv.pdf")
   pdf(oncotitiv_filename)
   plotTiTv(res = Onco.titv)
   dev.off()
   #------------------------------------------------------------------------------#
   current_date <- format(Sys.Date(), "%y%m%d")
-  oncoplot_filename <- paste0(current_date, "_oncoplot.pdf")
+  oncoplot_filename <- paste0(current_date,"_",Name, "_oncoplot.pdf")
   pdf(oncoplot_filename)
   oncoplot(maf = Onco,
            genes = top_genes,
@@ -176,12 +181,12 @@ if (file.exists('Clinical_annotation.txt')){
            top = GeneCut)
   dev.off()
   #------------------------------------------------------------------------------#
-  mafsummary_filename <- paste0(current_date, "_mafsummary.pdf")
+  mafsummary_filename <- paste0(current_date,"_",Name, "_mafsummary.pdf")
   pdf(mafsummary_filename)
   plotmafSummary(maf = Onco,color = Oncoprint_color, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
   dev.off()
   #------------------------------------------------------------------------------#
-  maf_lolli <- read.table('EasyOnco.maf', sep='\t', header=T)
+  maf_lolli <- read.table(output_file, sep='\t', header=T)
   gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant" & maf_lolli$Variant_Classification !="Silent_Mutation")
   Intron_gene <- unique(gene$Hugo_Symbol)
   # idx <- which(maf_lolli$Hugo_Symbol %in% Intron_gene)
@@ -194,7 +199,7 @@ if (file.exists('Clinical_annotation.txt')){
                           clinicalData = Clinical_annotation)
   
   #------------------------------------------------------------------------------#
-  lollipopplot_filename <- paste0(current_date, "_lollipop.pdf")
+  lollipopplot_filename <- paste0(current_date,"_",Name, "_lollipop.pdf")
   pdf(lollipopplot_filename)
   for (Gene in Intron_gene) {
     lollipopPlot(maf = Onco_lolli,
@@ -207,19 +212,19 @@ if (file.exists('Clinical_annotation.txt')){
   }
   dev.off()
   #------------------------------------------------------------------------------#
-  vafplot_filename <- paste0(current_date, "_vafplot.pdf")
+  vafplot_filename <- paste0(current_date,"_",Name, "_vafplot.pdf")
   pdf(vafplot_filename)
   plotVaf(maf = Onco, vafCol = 'i_TumorVAF_WU', width = 10, height = 10)
   dev.off()
   #------------------------------------------------------------------------------#
-  drugint_filename <- paste0(current_date, "_druginteraction.pdf")
+  drugint_filename <- paste0(current_date,"_",Name, "_druginteraction.pdf")
   pdf(drugint_filename)
   drugInteractions(maf = Onco, fontSize = 0.75)
   dev.off()
   #------------------------------------------------------------------------------#
 } else {
   #------------------------------------------------------------------------------#
-  maf <- read.table('EasyOnco.maf', sep='\t', header=T)
+  maf <- read.table(output_file, sep='\t', header=TRUE)
   # Clinical_annotation <- read.table('Clinical_annotation.txt', sep='\t', header=T)
   current_date <- format(Sys.Date(), "%y%m%d")
   #------------------------------------------------------------------------------#
@@ -241,7 +246,8 @@ if (file.exists('Clinical_annotation.txt')){
                     verbose=T,
                     vc_nonSyn = VariantClassification)
   #------------------------------------------------------------------------------#
-  write.mafSummary(maf = Onco, basename = 'Onco')
+  output_name <- paste0(Name, "Onco")
+  write.mafSummary(maf = Onco, basename = output_name)
   #------------------------------------------------------------------------------#
   options_df <- read_excel("../oncoplot_options_v1.xlsx", col_names = TRUE)
   options_list <- setNames(as.list(options_df$Value), options_df$Options)
@@ -296,13 +302,13 @@ if (file.exists('Clinical_annotation.txt')){
   GeneCut <- length(Oncogenes)
   #------------------------------------------------------------------------------#
   Onco.titv = titv(maf = Onco, plot = FALSE, useSyn = TRUE)
-  oncotitiv_filename <- paste0(current_date, "_onco.titv.pdf")
+  oncotitiv_filename <- paste0(current_date,"_",Name, "_onco.titv.pdf")
   pdf(oncotitiv_filename)
   plotTiTv(res = Onco.titv)
   dev.off()
   #------------------------------------------------------------------------------#
   current_date <- format(Sys.Date(), "%y%m%d")
-  oncoplot_filename <- paste0(current_date, "_oncoplot.pdf")
+  oncoplot_filename <- paste0(current_date,"_",Name, "_oncoplot.pdf")
   pdf(oncoplot_filename)
   oncoplot(maf = Onco, 
            genes = top_genes,
@@ -321,12 +327,12 @@ if (file.exists('Clinical_annotation.txt')){
            top = GeneCut)
   dev.off()
   #------------------------------------------------------------------------------#
-  mafsummary_filename <- paste0(current_date, "_mafsummary.pdf")
+  mafsummary_filename <- paste0(current_date,"_",Name, "_mafsummary.pdf")
   pdf(mafsummary_filename)
   plotmafSummary(maf = Onco,color = Oncoprint_color, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
   dev.off()
   #------------------------------------------------------------------------------#
-  maf_lolli <- read.table('EasyOnco.maf', sep='\t', header=T)
+  maf_lolli <- read.table(output_file, sep='\t', header=T)
   gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant" & maf_lolli$Variant_Classification !="Silent_Mutation")
   Intron_gene <- unique(gene$Hugo_Symbol)
   # idx <- which(maf_lolli$Hugo_Symbol %in% Intron_gene)
@@ -338,7 +344,7 @@ if (file.exists('Clinical_annotation.txt')){
                           vc_nonSyn = VariantClassification)
   
   #------------------------------------------------------------------------------#
-  lollipopplot_filename <- paste0(current_date, "_lollipop.pdf")
+  lollipopplot_filename <- paste0(current_date,"_",Name, "_lollipop.pdf")
   pdf(lollipopplot_filename)
   for (Gene in Intron_gene) {
     lollipopPlot(maf = Onco_lolli,
@@ -351,12 +357,12 @@ if (file.exists('Clinical_annotation.txt')){
   }
   dev.off()
   #------------------------------------------------------------------------------#
-  vafplot_filename <- paste0(current_date, "_vafplot.pdf")
+  vafplot_filename <- paste0(current_date,"_",Name, "_vafplot.pdf")
   pdf(vafplot_filename)
   plotVaf(maf = Onco, vafCol = 'i_TumorVAF_WU', width = 10, height = 10)
   dev.off()
   #------------------------------------------------------------------------------#
-  drugint_filename <- paste0(current_date, "_druginteraction.pdf")
+  drugint_filename <- paste0(current_date,"_",Name, "_druginteraction.pdf")
   pdf(drugint_filename)
   drugInteractions(maf = Onco, fontSize = 0.75)
   dev.off()

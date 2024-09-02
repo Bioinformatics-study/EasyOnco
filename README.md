@@ -9,12 +9,16 @@ Python version >= 3.0
 Python libraries
 - [Pandas](https://pypi.org/project/pandas/)
 - [Argparse](https://pypi.org/project/argparse/)
+- [openpyxl](https://openpyxl.readthedocs.io/en/stable/tutorial.html)
 ```
 # install pandas
 pip install pandas
 
 # install argparse
 pip install argparse
+
+# install openpyxl
+pip install openpyxl
 ```
 
 R library

@@ -144,7 +144,9 @@ def run() :
         mkMAF(File, args, path)
 
     #####!!!!!!!#####
-    command = f'Rscript ../Oncoplotter_v1.R {args.output}'
+    EasyOnco_path = str(__file__).split('/')[:-1]
+    EasyOnco_path = '/'.join(EasyOnco_path)
+    command = f'Rscript {EasyOnco_path}/Oncoplotter_v1.R {args.output}'
     os.system(command)
 #----------------------------------------------------------------------------------------#
 if __name__ == '__main__' : 

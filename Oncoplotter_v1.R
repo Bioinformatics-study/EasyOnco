@@ -309,7 +309,7 @@ if (file.exists('./option/Clinical_annotation.txt')){
   if (tolower(options_list$`Top gene`) == 'all') {
     Oncogenes <- Onco@gene.summary$Hugo_Symbol
   } else {
-    top_gene_num <- as.numeric(Option$Top_gene)
+    top_gene_num <- as.numeric(options_list$'Top gene')
     Oncogenes <- Onco@gene.summary$Hugo_Symbol[1:top_gene_num]
   }
   GeneCut <- length(Oncogenes)

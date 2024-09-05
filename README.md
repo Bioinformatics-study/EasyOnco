@@ -68,8 +68,12 @@ python EasyOnco.py -i *xlsx -f v vv x -s P -o example.maf
 - `-o` : Specifies the name of the maf file to be generated as the result. If not specified, the result is generated under the name EasyOnco.maf by default.
 
 ## 📊 Output
-![그림1](https://github.com/user-attachments/assets/cbc7b7da-9474-435e-9ce7-96f3bccca4cb)
-
+### Oncoprint & mafsummary plot
+![그림1](https://github.com/user-attachments/assets/140e8f04-2526-4a14-a216-5b4798254f49)
+### lollipop & vaf plot
+![2](https://github.com/user-attachments/assets/a6a3e34b-b1fa-4340-9986-a4de4ce9e41b)
+### ti/tv & druggable plot
+![3](https://github.com/user-attachments/assets/b6b18976-a730-4dd0-8c1b-c2d90c3bdb26)
 
 ## 🤖 Running Manually
 > Steps to create the default output

@@ -352,8 +352,7 @@ if (file.exists('./option/Clinical_annotation.txt')){
   
   Onco_lolli <-  read.maf(maf = gene,
                           verbose=T,
-                          vc_nonSyn = VariantClassification,
-                          clinicalData = Clinical_annotation)
+                          vc_nonSyn = VariantClassification)
   
   maftools_path <- find.package("maftools")
   protein_db_path <- file.path(maftools_path,"extdata","protein_domains.RDs")

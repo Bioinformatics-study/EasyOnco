@@ -132,7 +132,7 @@ def run() :
     warnings.simplefilter(action='ignore', category=FutureWarning)
     parser = argparse.ArgumentParser(description='OnGoPlotter Usage')
     parser.add_argument("-i", "--input", dest = "input", action = "store", nargs='+')
-    parser.add_argument("-f", "--selected_filter", dest = "filter", action = "store", nargs='+', type = str, default = ['v'])
+    parser.add_argument("-f", "--selected_filter", dest = "filter", action = "store", nargs='+', required = True, type = str)
     parser.add_argument("-s","--sheet", dest = "sheets", action = "store", nargs='+', choices=['P','A'], required = True, help='Pathogenic.VUS(P),All.Variants(A)')
     parser.add_argument("-o","--output", dest = "output", action = "store", default = 'EasyOnco.maf')
     parser.add_argument("-m", "--maf-only", dest="mafonly", action="store", choices=['y', 'n'], default='n')

@@ -5,7 +5,9 @@ library(scales)
 library(circlize)
 #------------------------------------------------------------------------------#
 args = commandArgs(trailingOnly = TRUE)
-output_file <- args[1]
+# output_file <- args[1]
+output_file <- "test.maf"
+
 Name <- sub('.maf$','',output_file)
 #------------------------------------------------------------------------------#
 if (file.exists('./option/Clinical_annotation.txt')){
@@ -87,35 +89,58 @@ if (file.exists('./option/Clinical_annotation.txt')){
     Genes <- NULL
   }
   #------------------------------------------------------------------------------#
-  sample_order_option <- get_option("sample_cluster_by")
-  
-  if (!is.null(sample_order_option) && sample_order_option %in% colnames(Clinical_annotation)) {
-    sample_order <- Clinical_annotation %>%
-      arrange(.[[sample_order_option]]) %>%
-      pull(Tumor_Sample_Barcode)
+  if (get_option("sample_cluster_by") != "no"){
+    sample_order_option <-get_option("sample_cluster_by")
   } else {
+    sample_order_option <- NULL
+  }
+  
+  if(get_option("sample_cluster_order") != "no"){
+    order_option <- get_option("sample_cluster_order")
+  } else {
+    order_option <- NULL
+  }
+  
+
+  if (!is.null(sample_order_option)){
+    if (!is.null(order_option)){
+      sort_order <- strsplit(order_option, ',')
+      sort_order <- sort_order[[1]]
+      sort_order <- gsub(' ', '', sort_order)
+      
+      test <- as.vector(Clinical_annotation[,sample_order_option])
+      test<- factor(Clinical_annotation[,sample_order_option],levels=sort_order)
+      canno_sorted <-  Clinical_annotation[order(test),]
+      sample_order <- canno_sorted$Tumor_Sample_Barcode
+    } else{
+      sample_order <- Clinical_annotation %>%
+        arrange(.[[sample_order_option]]) %>%
+        pull(Tumor_Sample_Barcode)
+    }
+  } else{
     sample_order <- NULL
   }
+
   #------------------------------------------------------------------------------#
   annotation_colors <- options_df %>%
     dplyr::filter(grepl("Annotation color", options_list)) %>%
     pull(Value)
   clinical_features <- colnames(Clinical_annotation)[-1]
-  categorical_features <- options_df$Value[27:31]
+  categorical_features <- options_df$Value[28:32]
   
-  continuous_features <- options_df$Value[32:36]
+  continuous_features <- options_df$Value[33:37]
   continuous_features <- continuous_features[!continuous_features %in% c("NA", NA)]
   
   remove_na <- function(vec) {
     vec[vec != "NA"]
   }
-  categorical_colors <- options_df$Value[37:86]
+  categorical_colors <- options_df$Value[38:87]
   categorical_groups <- split(categorical_colors, ceiling(seq_along(categorical_colors) / 10))
   categorical_groups <- lapply(categorical_groups, remove_na)
   
   valid_categorical_features <- categorical_features[!categorical_features %in% c("NA", NA)]
   
-  continuous_colors <- options_df$Value[87:96]
+  continuous_colors <- options_df$Value[88:97]
   continuous_groups <- split(continuous_colors, ceiling(seq_along(continuous_colors) / 2))
   continuous_groups <- lapply(continuous_groups, remove_na)
   
@@ -168,6 +193,24 @@ if (file.exists('./option/Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   current_date <- format(Sys.Date(), "%y%m%d")
   oncoplot_filename <- paste0(current_date,"_",Name, "_oncoplot.pdf")
+  if(get_option("removeNonMutated") == "yes"){
+    removeNonMutated <- TRUE
+  } else{
+    removeNonMutated <- FALSE
+  }
+  
+  if(get_option("writeMatrix") == "yes"){
+    writeMatrix <- TRUE
+  } else{
+    writeMatrix <- FALSE
+  }
+  
+  if(get_option("showTumorSampleBarcodes") == "yes"){
+    showTumorSampleBarcodes <- TRUE
+  } else{
+    showTumorSampleBarcodes <- FALSE
+  }
+  
   pdf(oncoplot_filename)
   oncoplot(maf = Onco,
            genes = top_genes,
@@ -175,9 +218,9 @@ if (file.exists('./option/Clinical_annotation.txt')){
            leftBarLims = c(0,100),
            leftBarData = Genes,
            fontSize = as.numeric(get_option("fontSize")),
-           removeNonMutated = as.logical(get_option("removeNonMutated")),
-           writeMatrix = as.logical(get_option("writeMatrix")),
-           showTumorSampleBarcodes = as.logical(get_option("showTumorSampleBarcodes")),
+           removeNonMutated <- removeNonMutated,
+           writeMatrix = writeMatrix,
+           showTumorSampleBarcodes = showTumorSampleBarcodes,
            legendFontSize = 1,
            annoBorderCol=anno_border_col,
            annotationFontSize = 1,
@@ -240,12 +283,14 @@ if (file.exists('./option/Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   VariantClassification = c("Frame_Shift_Del",
                             "Frame_Shift_Ins",
+                            "Frame_Shift_Indel",
                             "Splice_Site",
                             "Translation_Start_Site",
                             "Nonsense_Mutation",
                             "Nonstop_Mutation",
                             "In_Frame_Del",
                             "In_Frame_Ins",
+                            "In_Frame_Indel",
                             "Missense_Mutation",
                             "Start_Codon_Del",
                             "Stop_Codon_Del",
@@ -268,10 +313,12 @@ if (file.exists('./option/Clinical_annotation.txt')){
   Oncoprint_color <- c(
     Frame_Shift_Del = get_option("Frame_Shift_Del"),
     Frame_Shift_Ins = get_option("Frame_Shift_Ins"),
+    Frame_Shift_Indel = get_option("Frame_Shift_Indel"),
     Splice_Site = get_option("Splice_Site"),
     Nonsense_Mutation = get_option("Nonsense_Mutation"),
     In_Frame_Del = get_option("In_Frame_Del"),
     In_Frame_Ins = get_option("In_Frame_Ins"),
+    In_Frame_Indel = get_option("In_Frame_Indel"),
     Missense_Mutation = get_option("Missense_Mutation"),
     Multi_Hit = get_option("Multi_Hit"),
     Translation_Start_Site = get_option("Translation_Start_Site"),
@@ -322,20 +369,39 @@ if (file.exists('./option/Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   current_date <- format(Sys.Date(), "%y%m%d")
   oncoplot_filename <- paste0(current_date,"_",Name, "_oncoplot.pdf")
+  if(get_option("removeNonMutated") == "yes"){
+    removeNonMutated <- TRUE
+  } else{
+    removeNonMutated <- FALSE
+  }
+  
+  if(get_option("writeMatrix") == "yes"){
+    writeMatrix <- TRUE
+  } else{
+    writeMatrix <- FALSE
+  }
+  
+  if(get_option("showTumorSampleBarcodes") == "yes"){
+    showTumorSampleBarcodes <- TRUE
+  } else{
+    showTumorSampleBarcodes <- FALSE
+  }
+  
   pdf(oncoplot_filename)
-  oncoplot(maf = Onco, 
+  oncoplot(maf = Onco,
            genes = top_genes,
            colors = Oncoprint_color,
            leftBarLims = c(0,100),
            leftBarData = Genes,
            fontSize = as.numeric(get_option("fontSize")),
-           removeNonMutated = as.logical(get_option("removeNonMutated")),
-           writeMatrix = as.logical(get_option("writeMatrix")),
-           showTumorSampleBarcodes = as.logical(get_option("showTumorSampleBarcodes")),
+           removeNonMutated <- removeNonMutated,
+           writeMatrix = writeMatrix,
+           showTumorSampleBarcodes = showTumorSampleBarcodes,
            legendFontSize = 1,
-           annoBorderCol = anno_border_col,
+           annoBorderCol=anno_border_col,
            annotationFontSize = 1,
            anno_height = 2,
+           sampleOrder = sample_order,
            titleText = plot_title,
            annotationColor = Annotation_color,
            top = GeneCut)

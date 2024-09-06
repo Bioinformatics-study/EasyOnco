@@ -63,9 +63,9 @@ python EasyOnco.py -i *xlsx -f v vv x -s P -o example.maf
 *Required Arguments*
 - `-i` : Specify the xlsx file for each sample to create the Oncoplot (Use regular expressions if possible).
 - `-s` : Fill in the Excel sheet after conducting mutation analysis. [P: path.vus, A: All variants]
+- `-f` : Specify the character(s) used to indicate the true variant in the 'selected' column. If multiple characters were used, separate them with spaces.
 
 *Optional Arguments*
-- `-f` : Filtering field; the default is 'v'. If you want to include other marks to indicate true variants, enter them separated by spaces.
 - `-o` : Specifies the name of the maf file to be generated as the result. If not specified, the result is generated under the name EasyOnco.maf by default.
 - `-m` : To run the process only up to MAF file generation, use the 'y' option. If not set, the default is 'n', and the Oncoplot will also be generated.
 

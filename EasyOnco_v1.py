@@ -131,7 +131,7 @@ def mkMAF(file, args, path) :
 def run() : 
     warnings.simplefilter(action='ignore', category=FutureWarning)
     parser = argparse.ArgumentParser(description='OnGoPlotter Usage')
-    parser.add_argument("-i", "--input", dest = "input", action = "store", nargs='+')
+    parser.add_argument("-i", "--input", dest = "input", action = "store", nargs='+', required=True)
     parser.add_argument("-f", "--selected_filter", dest = "filter", action = "store", nargs='+', required = True, type = str)
     parser.add_argument("-s","--sheet", dest = "sheets", action = "store", nargs='+', choices=['P','A'], required = True, help='Pathogenic.VUS(P),All.Variants(A)')
     parser.add_argument("-o","--output", dest = "output", action = "store", default = 'EasyOnco.maf')
@@ -142,7 +142,10 @@ def run() :
     global MAF
     MAF = pd.DataFrame(columns=['Hugo_Symbol','Chromosome','Start_Position','End_Position','Reference_Allele','Tumor_Seq_Allele2','Variant_Classification','Variant_Type','Tumor_Sample_Barcode','Protein_Change','i_TumorVAF_WU','i_transcript_name'])
     for File in args.input :
-        mkMAF(File, args, path)
+        if 'oncoplot_options' in File :
+            pass
+        else :
+            mkMAF(File, args, path)
     if args.mafonly == 'n' :
         EasyOnco_path = str(__file__).split('/')[:-1]
         EasyOnco_path = '/'.join(EasyOnco_path)

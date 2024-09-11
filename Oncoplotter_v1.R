@@ -8,10 +8,10 @@ args = commandArgs(trailingOnly = TRUE)
 output_file <- args[1]
 Name <- sub('.maf$','',output_file)
 #------------------------------------------------------------------------------#
-if (file.exists('./option/Clinical_annotation.txt')){
+if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   maf <- read.table(output_file, sep='\t', header=TRUE)
-  Clinical_annotation <- read.table('./option/Clinical_annotation.txt', sep='\t', header=T)
+  Clinical_annotation <- read.table('Clinical_annotation.txt', sep='\t', header=T)
   current_date <- format(Sys.Date(), "%y%m%d")
   #------------------------------------------------------------------------------#
   VariantClassification = c("Frame_Shift_Del",
@@ -38,7 +38,7 @@ if (file.exists('./option/Clinical_annotation.txt')){
   output_name <- paste0(Name, "_Onco")
   write.mafSummary(maf = Onco, basename = output_name)
   #------------------------------------------------------------------------------#
-  options_df <- read_excel("./option/oncoplot_options_v1.xlsx", col_names = TRUE)
+  options_df <- read_excel("oncoplot_options_v1.xlsx", col_names = TRUE)
   options_list <- setNames(as.list(options_df$Value), options_df$Options)
   get_option <- function(option_name) {
     return(options_list[[option_name]])
@@ -305,7 +305,7 @@ if (file.exists('./option/Clinical_annotation.txt')){
   output_name <- paste0(Name, "_Onco")
   write.mafSummary(maf = Onco, basename = output_name)
   #------------------------------------------------------------------------------#
-  options_df <- read_excel("./option/oncoplot_options_v1.xlsx", col_names = TRUE)
+  options_df <- read_excel("oncoplot_options_v1.xlsx", col_names = TRUE)
   options_list <- setNames(as.list(options_df$Value), options_df$Options)
   get_option <- function(option_name) {
     return(options_list[[option_name]])

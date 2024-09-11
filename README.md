@@ -1,4 +1,4 @@
-### 🎨 [EasyOnco](https://pear-backbone-021.notion.site/EasyOnco-d8e4113910d741d29f988026c95d853a?pvs=4)
+### 🎨 [EasyOnco](https://pear-backbone-021.notion.site/EasyOnco-075b48b50bc2491ba64dea730c4eff47?pvs=4)
 
 ## 💬 Introduction
 EasyOnco is a tool that create an MAF file with the result file of [PiSeq](https://www.annlabmed.org/journal/view.html?doi=10.3343/alm.2023.43.4.328) pipeline and draw oncoplot using maftools.

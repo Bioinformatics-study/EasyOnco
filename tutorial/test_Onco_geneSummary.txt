@@ -1,0 +1,10 @@
+Hugo_Symbol	Duplication	Frame_Shift_Del	Intron_variant	Missense_Mutation	Nonsense_Mutation	Splice_Site	total	MutatedSamples	AlteredSamples
+DNMT3A	0	2	0	4	0	2	8	8	8
+ASXL1	0	2	0	0	4	0	6	6	6
+KMT2D	0	3	0	0	2	0	5	5	5
+CALR	0	0	0	2	0	0	2	2	2
+FLT3	0	0	2	0	0	0	2	2	2
+JAK2	0	0	2	0	0	0	2	2	2
+TET2	2	0	0	0	0	0	2	2	2
+TP53	0	0	0	2	0	0	2	2	2
+U2AF1	0	0	2	0	0	0	2	2	2

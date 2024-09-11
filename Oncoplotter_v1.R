@@ -236,7 +236,10 @@ if (file.exists('./option/Clinical_annotation.txt')){
   dev.off()
   #------------------------------------------------------------------------------#
   maf_lolli <- read.table(output_file, sep='\t', header=T)
-  gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant" & maf_lolli$Variant_Classification !="Silent_Mutation" & maf_lolli$Variant_Classification != 'Splice_Site')
+  gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant" 
+                 & maf_lolli$Variant_Classification !="Silent_Mutation" 
+                 & maf_lolli$Variant_Classification != 'Splice_Site' 
+                 & maf_lolli$Variant_Classification != "")
   Total_gene <- unique(gene$Hugo_Symbol)
   
   Onco_lolli <-  read.maf(maf = gene,
@@ -399,7 +402,6 @@ if (file.exists('./option/Clinical_annotation.txt')){
            annoBorderCol=anno_border_col,
            annotationFontSize = 1,
            anno_height = 2,
-           sampleOrder = sample_order,
            titleText = plot_title,
            annotationColor = Annotation_color,
            top = GeneCut)
@@ -411,7 +413,10 @@ if (file.exists('./option/Clinical_annotation.txt')){
   dev.off()
   #------------------------------------------------------------------------------#
   maf_lolli <- read.table(output_file, sep='\t', header=T)
-  gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant" & maf_lolli$Variant_Classification !="Silent_Mutation" & maf_lolli$Variant_Classification != 'Splice_Site')
+  gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant" 
+                 & maf_lolli$Variant_Classification !="Silent_Mutation" 
+                 & maf_lolli$Variant_Classification != 'Splice_Site' 
+                 & maf_lolli$Variant_Classification != "")
   Total_gene <- unique(gene$Hugo_Symbol)
   
   Onco_lolli <-  read.maf(maf = gene,

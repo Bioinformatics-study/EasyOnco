@@ -1,0 +1,15 @@
+Tumor_Sample_Barcode	Group	Response	Age	BMI
+Sample1	HCC	CR	45	20
+Sample3	AML	PR	51	18
+Sample5	HCC	CR	60	31
+Sample9	HCC	CR	72	26
+Sample10	HCC	CR	63	27
+Sample14	HCC	SD	62	29
+Sample15	HCC	CR	45	20
+Sample20	HCC	NR	67	14
+Sample22	HCC	CR	66	24
+Sample24	HCC	CR	63	27
+Sample28	HCC	SD	62	29
+Sample29	HCC	SD	62	29
+Sample33	AML	PR	51	18
+Sample34	AML	PR	51	18

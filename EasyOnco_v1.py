@@ -19,7 +19,10 @@ def mkMAF(file, args, path) :
     global MAF
     for sheet in args.sheets : 
         tmp = pd.read_excel(f'{path}/{file}',sheet_name=sheet, engine='openpyxl')
-        tmp = tmp[tmp['select'].isin(args.filter)]
+        # tmp = tmp[tmp['select'].isin(args.filter)]
+        # pattern = '|'.join([re.sub(r'\*', r'.*', f) for f in args.filter]) 
+        pattern = '|'.join(f for f in args.filter)
+        tmp = tmp[tmp['select'].str.contains(pattern, regex=True, na=False)]
         tmp.rename(columns={'gene':'Hugo_Symbol', 'ref':'Reference_Allele', 'alt':'Tumor_Seq_Allele2', 'VAF.var.freq':'i_TumorVAF_WU', 'NM':'i_transcript_name'}, inplace = True)
         tmp['Chromosome'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[0].replace('chr',""))
         tmp['Start_Position'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[1].split('-')[0])

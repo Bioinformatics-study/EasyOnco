@@ -22,6 +22,7 @@ def mkMAF(file, args, path) :
         # tmp = tmp[tmp['select'].isin(args.filter)]
         # pattern = '|'.join([re.sub(r'\*', r'.*', f) for f in args.filter]) 
         pattern = '|'.join(f for f in args.filter)
+        tmp['select'] = tmp['select'].astype(str)
         tmp = tmp[tmp['select'].str.contains(pattern, regex=True, na=False)]
         tmp.rename(columns={'gene':'Hugo_Symbol', 'ref':'Reference_Allele', 'alt':'Tumor_Seq_Allele2', 'VAF.var.freq':'i_TumorVAF_WU', 'NM':'i_transcript_name'}, inplace = True)
         tmp['Chromosome'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[0].replace('chr',""))
@@ -132,14 +133,15 @@ def mkMAF(file, args, path) :
     MAF.to_csv(f'{path}/{args.output}', index = False, sep ='\t')
 #----------------------------------------------------------------------------------------#
 def run() : 
-    warnings.simplefilter(action='ignore', category=FutureWarning)
-    parser = argparse.ArgumentParser(description='OnGoPlotter Usage')
-    parser.add_argument("-i", "--input", dest = "input", action = "store", nargs='+', required=True)
-    parser.add_argument("-f", "--selected_filter", dest = "filter", action = "store", nargs='+', required = True, type = str)
-    parser.add_argument("-s","--sheet", dest = "sheets", action = "store", nargs='+', choices=['P','A'], required = True, help='Pathogenic.VUS(P),All.Variants(A)')
-    parser.add_argument("-o","--output", dest = "output", action = "store", default = 'EasyOnco.maf')
-    parser.add_argument("-m", "--maf-only", dest="mafonly", action="store", choices=['y', 'n'], default='n')
-    args = parser.parse_args()
+    # warnings.simplefilter(action='ignore', category=FutureWarning)
+    # parser = argparse.ArgumentParser(description='OnGoPlotter Usage')
+    # parser.add_argument("-i", "--input", dest = "input", action = "store", nargs='+', required=True)
+    # parser.add_argument("-f", "--selected_filter", dest = "filter", action = "store", nargs='+', required = True, type = str)
+    # parser.add_argument("-s","--sheet", dest = "sheets", action = "store", nargs='+', choices=['P','A'], required = True, help='Pathogenic.VUS(P),All.Variants(A)')
+    # parser.add_argument("-o","--output", dest = "output", action = "store", default = 'EasyOnco.maf')
+    # parser.add_argument("-m", "--maf-only", dest="mafonly", action="store", choices=['y', 'n'], default='n')
+    # parser.add_argument("-e", "--easyonco", dest="easyonco", action="store",)
+    # args = parser.parse_args()
     path = os.getcwd()
     args.sheets = list(map(transform_args, args.sheets))
     global MAF
@@ -158,4 +160,20 @@ def run() :
         pass
 #----------------------------------------------------------------------------------------#
 if __name__ == '__main__' : 
-    run()
+    warnings.simplefilter(action='ignore', category=FutureWarning)
+    parser = argparse.ArgumentParser(description='OnGoPlotter Usage')
+    parser.add_argument("-i", "--input", dest = "input", action = "store", nargs='+') #required=True
+    parser.add_argument("-f", "--selected_filter", dest = "filter", action = "store", nargs='+',type = str) #required=True 
+    parser.add_argument("-s","--sheet", dest = "sheets", action = "store", nargs='+', choices=['P','A'], help='Pathogenic.VUS(P),All.Variants(A)') #required=True
+    parser.add_argument("-o","--output", dest = "output", action = "store", default = 'EasyOnco.maf')
+    parser.add_argument("-m", "--maf-only", dest="mafonly", action="store", choices=['y', 'n'], default='n')
+    parser.add_argument("-e", "--easyonco", dest="easyonco", action="store")
+    args = parser.parse_args()
+
+    if args.easyonco :
+        EasyOnco_path = str(__file__).split('/')[:-1]
+        EasyOnco_path = '/'.join(EasyOnco_path)
+        command = f'Rscript {EasyOnco_path}/Oncoplotter_v1.R {args.easyonco}'
+        os.system(command)
+    else :
+        run()

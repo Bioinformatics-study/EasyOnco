@@ -18,19 +18,28 @@ def transform_args(value) :
 def mkMAF(file, args, path) :
     global MAF
     for sheet in args.sheets : 
-        print(file)
         tmp = pd.read_excel(f'{path}/{file}',sheet_name=sheet, engine='openpyxl')
+        col_names = tmp.columns.tolist()
+        col_names[0] = 'select'
+        tmp.columns = col_names
         pattern = '|'.join([re.sub(r'\*', r'.*', f) for f in args.filter]) 
         tmp['select'] = tmp['select'].astype(str)
         tmp = tmp[tmp['select']!='nan']
         tmp = tmp[tmp['select'].str.contains(pattern, regex=True, na=False)]
         tmp.rename(columns={'gene':'Hugo_Symbol', 'ref':'Reference_Allele', 'alt':'Tumor_Seq_Allele2', 'VAF.var.freq':'i_TumorVAF_WU', 'NM':'i_transcript_name'}, inplace = True)
-        tmp['Chromosome'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[0].replace('chr',""))
-        tmp['Start_Position'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[1].split('-')[0])
-        tmp['Start_Position'] = pd.to_numeric(tmp['Start_Position'])
-        tmp['End_Position'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[1].split('-')[1])
-        tmp['End_Position'] = pd.to_numeric(tmp['End_Position'])
-        tmp['Tumor_Sample_Barcode'] = file.split('.results.xlsx')[0]
+        # tmp['Chromosome'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[0].replace('chr',""))
+        tmp['Chromosome'] = tmp['chrom.pos'].apply(lambda x: x.split(':')[0].replace('chr', "") if isinstance(x, str) else "")
+        # tmp['Start_Position'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[1].split('-')[0])
+        # tmp['Start_Position'] = pd.to_numeric(tmp['Start_Position'])
+        tmp['Start_Position'] = tmp['chrom.pos'].apply(lambda x: x.split(':')[1].split('-')[0] if isinstance(x, str) and ':' in x else "")
+        tmp['Start_Position'] = pd.to_numeric(tmp['Start_Position'], errors='coerce')
+        # tmp['End_Position'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[1].split('-')[1])
+        # tmp['End_Position'] = pd.to_numeric(tmp['End_Position'])
+        tmp['End_Position'] = tmp['chrom.pos'].apply(lambda x: x.split(':')[1].split('-')[1] if isinstance(x, str) and ':' in x else "")
+        tmp['End_Position'] = pd.to_numeric(tmp['End_Position'], errors='coerce')
+        
+        # tmp['Tumor_Sample_Barcode'] = file.split('.results.xlsx')[0]
+        tmp['Tumor_Sample_Barcode'] = file.split('.xlsx')[0]
         tmp['Variant_Classification'] = ""
         tmp['Variant_Type'] = ""
         for i in range(len(tmp['HGVSc'])) :
@@ -129,8 +138,18 @@ def mkMAF(file, args, path) :
         tmp = tmp.assign(i_TumorVAF_WU=(tmp['i_TumorVAF_WU'] * 100).round(4))
         tmp = tmp[['Hugo_Symbol','Chromosome','Start_Position','End_Position','Reference_Allele','Tumor_Seq_Allele2','Variant_Classification','Variant_Type','Tumor_Sample_Barcode','Protein_Change','i_TumorVAF_WU','i_transcript_name']]
         MAF = pd.concat([MAF, tmp], axis=0, ignore_index=True)
+
     # MAF.to_excel(f'{path}/OnGo.xlsx',index = False)
-    MAF.to_csv(f'{path}/{args.output}', index = False, sep ='\t')
+    # MAF.to_csv(f'{path}/{args.output}', index = False, sep ='\t')
+
+    Sample_Names = [x.split('.xlsx')[0] for x in args.input]
+    VariantO = list(MAF['Tumor_Sample_Barcode'].unique())
+    VariantX = [x for x in Sample_Names if x not in VariantO]
+    for variantx in VariantX :
+        new_row = {'Tumor_Sample_Barcode': variantx}
+        MAFF = pd.concat([MAF, pd.DataFrame([new_row])], ignore_index=True)
+    MAFF.to_csv(f'{path}/{args.output}', index = False, sep ='\t')
+
 #----------------------------------------------------------------------------------------#
 def run() : 
     # warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -150,7 +169,14 @@ def run() :
         if 'oncoplot_options' in File :
             pass
         else :
-            mkMAF(File, args, path)
+            with open(args.log_file, 'a') as log_file:
+                log_file.write(f'Processing file: {File}\n')
+                try:
+                    mkMAF(File, args, path)
+                except Exception as e:
+                    log_file.write(f'Error file: {File}\n')
+
+
     if args.mafonly == 'n' :
         EasyOnco_path = str(__file__).split('/')[:-1]
         EasyOnco_path = '/'.join(EasyOnco_path)
@@ -160,6 +186,7 @@ def run() :
         pass
 #----------------------------------------------------------------------------------------#
 if __name__ == '__main__' : 
+    path = os.getcwd()
     warnings.simplefilter(action='ignore', category=FutureWarning)
     parser = argparse.ArgumentParser(description='OnGoPlotter Usage')
     parser.add_argument("-i", "--input", dest = "input", action = "store", nargs='+') #required=True
@@ -168,6 +195,7 @@ if __name__ == '__main__' :
     parser.add_argument("-o","--output", dest = "output", action = "store", default = 'EasyOnco.maf')
     parser.add_argument("-m", "--maf-only", dest="mafonly", action="store", choices=['y', 'n'], default='n')
     parser.add_argument("-e", "--easyonco", dest="easyonco", action="store")
+    parser.add_argument('--log_file', type=str, default=f'{path}/EasyOnco.log', help='Path to the log file.')
     args = parser.parse_args()
 
     if args.easyonco :

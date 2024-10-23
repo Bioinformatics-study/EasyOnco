@@ -18,6 +18,7 @@ def transform_args(value) :
 def mkMAF(file, args, path) :
     global MAF
     for sheet in args.sheets : 
+        print(file)
         tmp = pd.read_excel(f'{path}/{file}',sheet_name=sheet, engine='openpyxl')
         pattern = '|'.join([re.sub(r'\*', r'.*', f) for f in args.filter]) 
         tmp['select'] = tmp['select'].astype(str)

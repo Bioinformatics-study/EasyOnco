@@ -6,11 +6,14 @@ library(circlize)
 #------------------------------------------------------------------------------#
 args = commandArgs(trailingOnly = TRUE)
 output_file <- args[1]
+# output_file = 'test.maf'
 Name <- sub('.maf$','',output_file)
 #------------------------------------------------------------------------------#
 if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   maf <- read.table(output_file, sep='\t', header=TRUE)
+  maf[maf == ""] <- NA
+  # filtered_maf <- maf[apply(maf, 1, function(row) all(row != "." & !is.na(row))), ]
   Clinical_annotation <- read.table('Clinical_annotation.txt', sep='\t', header=T)
   current_date <- format(Sys.Date(), "%y%m%d")
   #------------------------------------------------------------------------------#
@@ -28,17 +31,29 @@ if (file.exists('Clinical_annotation.txt')){
                             "Start_Codon_Del",
                             "Stop_Codon_Del",
                             "Duplication",
-                            "Intron_variant")
+                            "Intron_variant",
+                            "Copy_Number_Gain",
+                            "Copy_Number_Loss",
+                            "Translocation",
+                            "Fusion",
+                            "Inversion",
+                            "Whole_gene_deletion",
+                            "Partial_gene_deletion"
+)
   #------------------------------------------------------------------------------#
   Onco <-  read.maf(maf = maf, 
                     verbose=T,
                     vc_nonSyn = VariantClassification,
                     clinicalData = Clinical_annotation)
+  # Filtered_Onco <-  read.maf(maf = filtered_maf,
+  #                   verbose=T,
+  #                   vc_nonSyn = VariantClassification,
+  #                   clinicalData = Clinical_annotation)
   #------------------------------------------------------------------------------#
   output_name <- paste0(Name, "_Onco")
   write.mafSummary(maf = Onco, basename = output_name)
   #------------------------------------------------------------------------------#
-  options_df <- read_excel("oncoplot_options_v1.xlsx", col_names = TRUE)
+  options_df <- read_excel("oncoplot_options_v2.xlsx", col_names = TRUE)
   options_list <- setNames(as.list(options_df$Value), options_df$Options)
   get_option <- function(option_name) {
     return(options_list[[option_name]])
@@ -60,7 +75,14 @@ if (file.exists('Clinical_annotation.txt')){
     Start_Codon_Del = get_option("Start_Codon_Del"),
     Stop_Codon_Del = get_option("Stop_Codon_Del"),
     Duplication = get_option("Duplication"),
-    Intron_variant = get_option("Intron_variant"))
+    Intron_variant = get_option("Intron_variant"),
+    Copy_Number_Gain = get_option("Copy_Number_Gain"),
+    Copy_Number_Loss = get_option("Copy_Number_Loss"),
+    Translocation = get_option("Translocation"),
+    Fusion = get_option("Fusion"),
+    Inversion = get_option("Inversion"),
+    Whole_gene_deletion = get_option("Whole_gene_deletion"),
+    Partial_gene_deletion = get_option("Partial_gene_deletion"))
   Oncoprint_color <- Oncoprint_color[!is.na(Oncoprint_color)]
   #------------------------------------------------------------------------------#
   anno_border_col <- get_option("annotation_border")
@@ -78,9 +100,9 @@ if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   vaf_plot <- if (get_option("VAF plot") == "yes") "yes" else FALSE
   if(vaf_plot == "yes") {
-    Genes <- subsetMaf(maf = Onco, 
+    Genes <- subsetMaf(maf = Onco,
                        genes = top_genes,
-                       fields = "i_TumorVAF_WU", 
+                       fields = "i_TumorVAF_WU",
                        mafObj = FALSE)[,mean(i_TumorVAF_WU, na.rm = TRUE), Hugo_Symbol]
     colnames(Genes)[2] = "VAF (%)"
   } else {
@@ -124,21 +146,21 @@ if (file.exists('Clinical_annotation.txt')){
     dplyr::filter(grepl("Annotation color", options_list)) %>%
     pull(Value)
   clinical_features <- colnames(Clinical_annotation)[-1]
-  categorical_features <- options_df$Value[28:32]
+  categorical_features <- options_df$Value[35:39]
   
-  continuous_features <- options_df$Value[33:37]
+  continuous_features <- options_df$Value[40:44]
   continuous_features <- continuous_features[!continuous_features %in% c("NA", NA)]
   
   remove_na <- function(vec) {
     vec[vec != "NA"]
   }
-  categorical_colors <- options_df$Value[38:87]
+  categorical_colors <- options_df$Value[45:94]
   categorical_groups <- split(categorical_colors, ceiling(seq_along(categorical_colors) / 10))
   categorical_groups <- lapply(categorical_groups, remove_na)
   
   valid_categorical_features <- categorical_features[!categorical_features %in% c("NA", NA)]
   
-  continuous_colors <- options_df$Value[88:97]
+  continuous_colors <- options_df$Value[95:104]
   continuous_groups <- split(continuous_colors, ceiling(seq_along(continuous_colors) / 2))
   continuous_groups <- lapply(continuous_groups, remove_na)
   
@@ -214,7 +236,6 @@ if (file.exists('Clinical_annotation.txt')){
            genes = top_genes,
            colors = Oncoprint_color,
            leftBarLims = c(0,100),
-           leftBarData = Genes,
            fontSize = as.numeric(get_option("fontSize")),
            removeNonMutated <- removeNonMutated,
            writeMatrix = writeMatrix,
@@ -234,25 +255,25 @@ if (file.exists('Clinical_annotation.txt')){
   pdf(mafsummary_filename)
   plotmafSummary(maf = Onco,color = Oncoprint_color, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
   dev.off()
-  #------------------------------------------------------------------------------#
+  # #------------------------------------------------------------------------------#
   maf_lolli <- read.table(output_file, sep='\t', header=T)
-  gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant" 
-                 & maf_lolli$Variant_Classification !="Silent_Mutation" 
-                 & maf_lolli$Variant_Classification != 'Splice_Site' 
+  gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant"
+                 & maf_lolli$Variant_Classification !="Silent_Mutation"
+                 & maf_lolli$Variant_Classification != 'Splice_Site'
                  & maf_lolli$Variant_Classification != "")
   Total_gene <- unique(gene$Hugo_Symbol)
-  
+
   Onco_lolli <-  read.maf(maf = gene,
                           verbose=T,
                           vc_nonSyn = VariantClassification,
                           clinicalData = Clinical_annotation)
-  
+
   maftools_path <- find.package("maftools")
   protein_db_path <- file.path(maftools_path,"extdata","protein_domains.RDs")
   proteindb <- readRDS(protein_db_path)
   DBGene <- unique(proteindb$HGNC)
   Total_gene <- intersect(DBGene, Total_gene)
-  #------------------------------------------------------------------------------#
+  # #------------------------------------------------------------------------------#
   lollipopplot_filename <- paste0(current_date,"_",Name, "_lollipop.pdf")
   pdf(lollipopplot_filename)
   for (Gene in Total_gene) {
@@ -265,12 +286,12 @@ if (file.exists('Clinical_annotation.txt')){
                  colors = Oncoprint_color)
   }
   dev.off()
-  #------------------------------------------------------------------------------#
+  # #------------------------------------------------------------------------------#
   vafplot_filename <- paste0(current_date,"_",Name, "_vafplot.pdf")
   pdf(vafplot_filename)
   plotVaf(maf = Onco, vafCol = 'i_TumorVAF_WU', width = 10, height = 10)
   dev.off()
-  #------------------------------------------------------------------------------#
+  # #------------------------------------------------------------------------------#
   drugint_filename <- paste0(current_date,"_",Name, "_druginteraction.pdf")
   pdf(drugint_filename)
   drugInteractions(maf = Onco, fontSize = 0.75)
@@ -279,6 +300,8 @@ if (file.exists('Clinical_annotation.txt')){
 } else {
   #------------------------------------------------------------------------------#
   maf <- read.table(output_file, sep='\t', header=TRUE)
+  maf[maf == ""] <- NA
+  # filtered_maf <- maf[apply(maf, 1, function(row) all(row != "." & !is.na(row))), ]
   # Clinical_annotation <- read.table('Clinical_annotation.txt', sep='\t', header=T)
   current_date <- format(Sys.Date(), "%y%m%d")
   #------------------------------------------------------------------------------#
@@ -296,16 +319,27 @@ if (file.exists('Clinical_annotation.txt')){
                             "Start_Codon_Del",
                             "Stop_Codon_Del",
                             "Duplication",
-                            "Intron_variant")
+                            "Intron_variant",
+                            "Copy_Number_Gain",
+                            "Copy_Number_Loss",
+                            "Translocation",
+                            "Fusion",
+                            "Inversion",
+                            "Whole_gene_deletion",
+                            "Partial_gene_deletion"
+  )
   #------------------------------------------------------------------------------#
   Onco <-  read.maf(maf = maf, 
                     verbose=T,
                     vc_nonSyn = VariantClassification)
+  # Filtered_Onco <-  read.maf(maf = filtered_maf, 
+  #                   verbose=T,
+  #                   vc_nonSyn = VariantClassification)
   #------------------------------------------------------------------------------#
   output_name <- paste0(Name, "_Onco")
   write.mafSummary(maf = Onco, basename = output_name)
   #------------------------------------------------------------------------------#
-  options_df <- read_excel("oncoplot_options_v1.xlsx", col_names = TRUE)
+  options_df <- read_excel("oncoplot_options_v2.xlsx", col_names = TRUE)
   options_list <- setNames(as.list(options_df$Value), options_df$Options)
   get_option <- function(option_name) {
     return(options_list[[option_name]])
@@ -327,7 +361,14 @@ if (file.exists('Clinical_annotation.txt')){
     Start_Codon_Del = get_option("Start_Codon_Del"),
     Stop_Codon_Del = get_option("Stop_Codon_Del"),
     Duplication = get_option("Duplication"),
-    Intron_variant = get_option("Intron_variant"))
+    Intron_variant = get_option("Intron_variant"),
+    Copy_Number_Gain = get_option("Copy_Number_Gain"),
+    Copy_Number_Loss = get_option("Copy_Number_Loss"),
+    Translocation = get_option("Translocation"),
+    Fusion = get_option("Fusion"),
+    Inversion = get_option("Inversion"),
+    Whole_gene_deletion = get_option("Whole_gene_deletion"),
+    Partial_gene_deletion = get_option("Partial_gene_deletion"))
   Oncoprint_color <- Oncoprint_color[!is.na(Oncoprint_color)]
   #------------------------------------------------------------------------------#
   anno_border_col <- get_option("annotation_border")
@@ -345,9 +386,9 @@ if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   vaf_plot <- if (get_option("VAF plot") == "yes") "yes" else FALSE
   if(vaf_plot == "yes") {
-    Genes <- subsetMaf(maf = Onco, 
+    Genes <- subsetMaf(maf = Onco,
                        genes = top_genes,
-                       fields = "i_TumorVAF_WU", 
+                       fields = "i_TumorVAF_WU",
                        mafObj = FALSE)[,mean(i_TumorVAF_WU, na.rm = TRUE), Hugo_Symbol]
     colnames(Genes)[2] = "VAF (%)"
   } else {
@@ -393,7 +434,6 @@ if (file.exists('Clinical_annotation.txt')){
            genes = top_genes,
            colors = Oncoprint_color,
            leftBarLims = c(0,100),
-           leftBarData = Genes,
            fontSize = as.numeric(get_option("fontSize")),
            removeNonMutated <- removeNonMutated,
            writeMatrix = writeMatrix,
@@ -411,24 +451,24 @@ if (file.exists('Clinical_annotation.txt')){
   pdf(mafsummary_filename)
   plotmafSummary(maf = Onco,color = Oncoprint_color, rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
   dev.off()
-  #------------------------------------------------------------------------------#
+  # #------------------------------------------------------------------------------#
   maf_lolli <- read.table(output_file, sep='\t', header=T)
-  gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant" 
-                 & maf_lolli$Variant_Classification !="Silent_Mutation" 
-                 & maf_lolli$Variant_Classification != 'Splice_Site' 
+  gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant"
+                 & maf_lolli$Variant_Classification !="Silent_Mutation"
+                 & maf_lolli$Variant_Classification != 'Splice_Site'
                  & maf_lolli$Variant_Classification != "")
   Total_gene <- unique(gene$Hugo_Symbol)
-  
+
   Onco_lolli <-  read.maf(maf = gene,
                           verbose=T,
                           vc_nonSyn = VariantClassification)
-  
+
   maftools_path <- find.package("maftools")
   protein_db_path <- file.path(maftools_path,"extdata","protein_domains.RDs")
   proteindb <- readRDS(protein_db_path)
   DBGene <- unique(proteindb$HGNC)
   Total_gene <- intersect(DBGene, Total_gene)
-  #------------------------------------------------------------------------------#
+  # #------------------------------------------------------------------------------#
   lollipopplot_filename <- paste0(current_date,"_",Name, "_lollipop.pdf")
   pdf(lollipopplot_filename)
   for (Gene in Total_gene) {
@@ -437,7 +477,7 @@ if (file.exists('Clinical_annotation.txt')){
                  AACol = NULL,
                  showMutationRate = TRUE,
                  showDomainLabel = FALSE,
-                 labelPos = NULL, 
+                 labelPos = NULL,
                  colors = Oncoprint_color)
   }
   dev.off()

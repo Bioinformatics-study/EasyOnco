@@ -171,7 +171,7 @@ def run() :
     if args.mafonly == 'n' :
         EasyOnco_path = str(__file__).split('/')[:-1]
         EasyOnco_path = '/'.join(EasyOnco_path)
-        command = f'Rscript {EasyOnco_path}/Oncoplotter_v1.R {args.output}'
+        command = f'Rscript {EasyOnco_path}/Oncoplotter_v2.R {args.output}'
         os.system(command)
     else :
         pass
@@ -192,7 +192,7 @@ if __name__ == '__main__' :
     if args.easyonco :
         EasyOnco_path = str(__file__).split('/')[:-1]
         EasyOnco_path = '/'.join(EasyOnco_path)
-        command = f'Rscript {EasyOnco_path}/Oncoplotter_v1.R {args.easyonco}'
+        command = f'Rscript {EasyOnco_path}/Oncoplotter_v2.R {args.easyonco}'
         os.system(command)
     else :
         run()

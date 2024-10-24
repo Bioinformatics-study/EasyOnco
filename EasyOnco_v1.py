@@ -4,6 +4,7 @@ import argparse
 import sys
 import re
 import warnings
+from datetime import datetime
 #----------------------------------------------------------------------------------------#
 def transform_args(value) :
     mapping = {
@@ -139,9 +140,6 @@ def mkMAF(file, args, path) :
         tmp = tmp[['Hugo_Symbol','Chromosome','Start_Position','End_Position','Reference_Allele','Tumor_Seq_Allele2','Variant_Classification','Variant_Type','Tumor_Sample_Barcode','Protein_Change','i_TumorVAF_WU','i_transcript_name']]
         MAF = pd.concat([MAF, tmp], axis=0, ignore_index=True)
 
-    # MAF.to_excel(f'{path}/OnGo.xlsx',index = False)
-    # MAF.to_csv(f'{path}/{args.output}', index = False, sep ='\t')
-
     Sample_Names = [x.split('.xlsx')[0] for x in args.input]
     VariantO = list(MAF['Tumor_Sample_Barcode'].unique())
     VariantX = [x for x in Sample_Names if x not in VariantO]
@@ -152,15 +150,6 @@ def mkMAF(file, args, path) :
 
 #----------------------------------------------------------------------------------------#
 def run() : 
-    # warnings.simplefilter(action='ignore', category=FutureWarning)
-    # parser = argparse.ArgumentParser(description='OnGoPlotter Usage')
-    # parser.add_argument("-i", "--input", dest = "input", action = "store", nargs='+', required=True)
-    # parser.add_argument("-f", "--selected_filter", dest = "filter", action = "store", nargs='+', required = True, type = str)
-    # parser.add_argument("-s","--sheet", dest = "sheets", action = "store", nargs='+', choices=['P','A'], required = True, help='Pathogenic.VUS(P),All.Variants(A)')
-    # parser.add_argument("-o","--output", dest = "output", action = "store", default = 'EasyOnco.maf')
-    # parser.add_argument("-m", "--maf-only", dest="mafonly", action="store", choices=['y', 'n'], default='n')
-    # parser.add_argument("-e", "--easyonco", dest="easyonco", action="store",)
-    # args = parser.parse_args()
     path = os.getcwd()
     args.sheets = list(map(transform_args, args.sheets))
     global MAF
@@ -170,12 +159,14 @@ def run() :
             pass
         else :
             with open(args.log_file, 'a') as log_file:
-                log_file.write(f'Processing file: {File}\n')
+                now = datetime.now()
+                log_file.write(f'Processing file: {File}\t({now.strftime("%Y-%m-%d %H:%M:%S")})\n')
                 try:
                     mkMAF(File, args, path)
                 except Exception as e:
-                    log_file.write(f'Error file: {File}\n')
-
+                    log_file.write(f'Error file: {File}\t({now.strftime("%Y-%m-%d %H:%M:%S")})\n')
+                    
+                    raise
 
     if args.mafonly == 'n' :
         EasyOnco_path = str(__file__).split('/')[:-1]

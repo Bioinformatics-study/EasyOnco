@@ -26,6 +26,7 @@ def mkMAF(file, args, path) :
         pattern = '|'.join([re.sub(r'\*', r'.*', f) for f in args.filter]) 
         tmp['select'] = tmp['select'].astype(str)
         tmp = tmp[tmp['select']!='nan']
+        tmp = tmp[tmp['select']!='NaN']
         tmp = tmp[tmp['select'].str.contains(pattern, regex=True, na=False)]
         tmp.rename(columns={'gene':'Hugo_Symbol', 'ref':'Reference_Allele', 'alt':'Tumor_Seq_Allele2', 'VAF.var.freq':'i_TumorVAF_WU', 'NM':'i_transcript_name'}, inplace = True)
         # tmp['Chromosome'] = tmp['chrom.pos'].apply(lambda x:x.split(':')[0].replace('chr',""))
@@ -140,14 +141,6 @@ def mkMAF(file, args, path) :
         tmp = tmp[['Hugo_Symbol','Chromosome','Start_Position','End_Position','Reference_Allele','Tumor_Seq_Allele2','Variant_Classification','Variant_Type','Tumor_Sample_Barcode','Protein_Change','i_TumorVAF_WU','i_transcript_name']]
         MAF = pd.concat([MAF, tmp], axis=0, ignore_index=True)
 
-    Sample_Names = [x.split('.xlsx')[0] for x in args.input]
-    VariantO = list(MAF['Tumor_Sample_Barcode'].unique())
-    VariantX = [x for x in Sample_Names if x not in VariantO]
-    for variantx in VariantX :
-        new_row = {'Tumor_Sample_Barcode': variantx}
-        MAFF = pd.concat([MAF, pd.DataFrame([new_row])], ignore_index=True)
-    MAFF.to_csv(f'{path}/{args.output}', index = False, sep ='\t')
-
 #----------------------------------------------------------------------------------------#
 def run() : 
     path = os.getcwd()
@@ -165,8 +158,14 @@ def run() :
                     mkMAF(File, args, path)
                 except Exception as e:
                     log_file.write(f'Error file: {File}\t({now.strftime("%Y-%m-%d %H:%M:%S")})\n')
-                    
                     raise
+    Sample_Names = [x.split('.xlsx')[0] for x in args.input]
+    VariantO = list(MAF['Tumor_Sample_Barcode'].unique())
+    VariantX = [x for x in Sample_Names if x not in VariantO]
+    for variantx in VariantX :
+        new_row = {'Tumor_Sample_Barcode': variantx}
+        MAF = pd.concat([MAF, pd.DataFrame([new_row])], ignore_index=True)
+    MAF.to_csv(f'{path}/{args.output}', index = False, sep ='\t')
 
     if args.mafonly == 'n' :
         EasyOnco_path = str(__file__).split('/')[:-1]

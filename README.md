@@ -68,6 +68,8 @@ python EasyOnco.py -i *xlsx -f v vv x -s P -o example.maf
 *Optional Arguments*
 - `-o` : Specifies the name of the maf file to be generated as the result. If not specified, the result is generated under the name EasyOnco.maf by default.
 - `-m` : To run the process only up to MAF file generation, use the 'y' option. If not set, the default is 'n', and the Oncoplot will also be generated.
+- `-e` : Used to only draw oncoplot only with the created maf file.
+- `--log_file` : Setting the name of the file that provides a record of the successfully executed file and the file where the error occured. EasyOnco.log by default.
 
 ## 📊 Output
 ### Oncoprint & mafsummary plot
@@ -79,14 +81,14 @@ python EasyOnco.py -i *xlsx -f v vv x -s P -o example.maf
 
 ## 🤖 Running Manually
 > Steps to create the default output
-1. Set the options in the `oncoplot_options_v1.xlsx` file according to the analysis requirements
+1. Set the options in the `oncoplot_options_v2.xlsx` file according to the analysis requirements
 2. Navigate to the directory containing the xlsx file with mutation information.
 3. If annotation information is available, save it as a file named `Clinical_annotation.txt`.
 4. Enter the Input file, filter string, and xlsx sheet information as shown in the Python code example above.
 
 ## 🌈 For Customization
 > Steps to customize colors and annotation bars, etc
-1. Set the options in the `oncoplot_options_v1.xlsx` file.
+1. Set the options in the `oncoplot_options_v2.xlsx` file.
 2. Sections written in blue text can be customized with values of your choice.
 3. Black text indicates that only values set in the drop down can be selected.
 4. Clicking each cell will display a description of the values that can be entered.

@@ -5,8 +5,8 @@ library(scales)
 library(circlize)
 #------------------------------------------------------------------------------#
 args = commandArgs(trailingOnly = TRUE)
-output_file <- args[1]
-# output_file = 'test.maf'
+# output_file <- args[1]
+output_file = 'test.maf'
 Name <- sub('.maf$','',output_file)
 #------------------------------------------------------------------------------#
 if (file.exists('Clinical_annotation.txt')){
@@ -32,10 +32,12 @@ if (file.exists('Clinical_annotation.txt')){
                             "Stop_Codon_Del",
                             "Duplication",
                             "Intron_variant",
+                            "5'_UTR_variant",
+                            "3'_UTR_variant",
+                            "Promoter_variant",
                             "Copy_Number_Gain",
                             "Copy_Number_Loss",
                             "Translocation",
-                            "Fusion",
                             "Inversion",
                             "Whole_gene_deletion",
                             "Partial_gene_deletion"
@@ -76,10 +78,12 @@ if (file.exists('Clinical_annotation.txt')){
     Stop_Codon_Del = get_option("Stop_Codon_Del"),
     Duplication = get_option("Duplication"),
     Intron_variant = get_option("Intron_variant"),
+    `5'_UTR_variant` = get_option("5'_UTR_variant"),
+    `3'_UTR_variant` = get_option("3'_UTR_variant"),
+    Promoter_variant = get_option("Promoter_variant"),
     Copy_Number_Gain = get_option("Copy_Number_Gain"),
     Copy_Number_Loss = get_option("Copy_Number_Loss"),
     Translocation = get_option("Translocation"),
-    Fusion = get_option("Fusion"),
     Inversion = get_option("Inversion"),
     Whole_gene_deletion = get_option("Whole_gene_deletion"),
     Partial_gene_deletion = get_option("Partial_gene_deletion"))
@@ -146,21 +150,21 @@ if (file.exists('Clinical_annotation.txt')){
     dplyr::filter(grepl("Annotation color", options_list)) %>%
     pull(Value)
   clinical_features <- colnames(Clinical_annotation)[-1]
-  categorical_features <- options_df$Value[35:39]
+  categorical_features <- options_df$Value[37:41]
   
-  continuous_features <- options_df$Value[40:44]
+  continuous_features <- options_df$Value[42:46]
   continuous_features <- continuous_features[!continuous_features %in% c("NA", NA)]
   
   remove_na <- function(vec) {
     vec[vec != "NA"]
   }
-  categorical_colors <- options_df$Value[45:94]
+  categorical_colors <- options_df$Value[47:96]
   categorical_groups <- split(categorical_colors, ceiling(seq_along(categorical_colors) / 10))
   categorical_groups <- lapply(categorical_groups, remove_na)
   
   valid_categorical_features <- categorical_features[!categorical_features %in% c("NA", NA)]
   
-  continuous_colors <- options_df$Value[95:104]
+  continuous_colors <- options_df$Value[97:106]
   continuous_groups <- split(continuous_colors, ceiling(seq_along(continuous_colors) / 2))
   continuous_groups <- lapply(continuous_groups, remove_na)
   
@@ -260,6 +264,9 @@ if (file.exists('Clinical_annotation.txt')){
   gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant"
                  & maf_lolli$Variant_Classification !="Silent_Mutation"
                  & maf_lolli$Variant_Classification != 'Splice_Site'
+                 & maf_lolli$Variant_Classification != "5'_UTR_variant"
+                 & maf_lolli$Variant_Classification != "3'_UTR_variant"
+                 & maf_lolli$Variant_Classification != 'Promoter_variant'
                  & maf_lolli$Variant_Classification != "")
   Total_gene <- unique(gene$Hugo_Symbol)
 
@@ -320,10 +327,12 @@ if (file.exists('Clinical_annotation.txt')){
                             "Stop_Codon_Del",
                             "Duplication",
                             "Intron_variant",
+                            "5'_UTR_variant",
+                            "3'_UTR_variant",
+                            "Promoter_variant",
                             "Copy_Number_Gain",
                             "Copy_Number_Loss",
                             "Translocation",
-                            "Fusion",
                             "Inversion",
                             "Whole_gene_deletion",
                             "Partial_gene_deletion"
@@ -362,10 +371,12 @@ if (file.exists('Clinical_annotation.txt')){
     Stop_Codon_Del = get_option("Stop_Codon_Del"),
     Duplication = get_option("Duplication"),
     Intron_variant = get_option("Intron_variant"),
+    `5'_UTR_variant` = get_option("5'_UTR_variant"),
+    `3'_UTR_variant` = get_option("3'_UTR_variant"),
+    Promoter_variant = get_option("Promoter_variant"),
     Copy_Number_Gain = get_option("Copy_Number_Gain"),
     Copy_Number_Loss = get_option("Copy_Number_Loss"),
     Translocation = get_option("Translocation"),
-    Fusion = get_option("Fusion"),
     Inversion = get_option("Inversion"),
     Whole_gene_deletion = get_option("Whole_gene_deletion"),
     Partial_gene_deletion = get_option("Partial_gene_deletion"))
@@ -456,6 +467,9 @@ if (file.exists('Clinical_annotation.txt')){
   gene <- subset(maf_lolli, maf_lolli$Variant_Classification!="Intron_variant"
                  & maf_lolli$Variant_Classification !="Silent_Mutation"
                  & maf_lolli$Variant_Classification != 'Splice_Site'
+                 & maf_lolli$Variant_Classification != "5'_UTR_variant"
+                 & maf_lolli$Variant_Classification != "3'_UTR_variant"
+                 & maf_lolli$Variant_Classification != 'Promoter_variant'
                  & maf_lolli$Variant_Classification != "")
   Total_gene <- unique(gene$Hugo_Symbol)
 

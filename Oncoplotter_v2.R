@@ -5,8 +5,8 @@ library(scales)
 library(circlize)
 #------------------------------------------------------------------------------#
 args = commandArgs(trailingOnly = TRUE)
-# output_file <- args[1]
-output_file = 'test.maf'
+output_file <- args[1]
+# output_file = 'test.maf'
 Name <- sub('.maf$','',output_file)
 #------------------------------------------------------------------------------#
 if (file.exists('Clinical_annotation.txt')){

@@ -6,7 +6,6 @@ library(circlize)
 #------------------------------------------------------------------------------#
 args = commandArgs(trailingOnly = TRUE)
 output_file <- args[1]
-# output_file = 'test.maf'
 Name <- sub('.maf$','',output_file)
 #------------------------------------------------------------------------------#
 if (file.exists('Clinical_annotation.txt')){
@@ -14,8 +13,15 @@ if (file.exists('Clinical_annotation.txt')){
   maf <- read.table(output_file, sep='\t', header=TRUE)
   maf[maf == ""] <- NA
   # filtered_maf <- maf[apply(maf, 1, function(row) all(row != "." & !is.na(row))), ]
+  filtered_maf <- maf[!is.na(maf$Hugo_Symbol) & maf$Hugo_Symbol != "NA", ]
   Clinical_annotation <- read.table('Clinical_annotation.txt', sep='\t', header=T)
   current_date <- format(Sys.Date(), "%y%m%d")
+  #------------------------------------------------------------------------------#
+  options_df <- read_excel("oncoplot_options_v2.xlsx", col_names = TRUE)
+  options_list <- setNames(as.list(options_df$Value), options_df$Options)
+  get_option <- function(option_name) {
+    return(options_list[[option_name]])
+  }
   #------------------------------------------------------------------------------#
   VariantClassification = c("Frame_Shift_Del",
                             "Frame_Shift_Ins",
@@ -43,23 +49,22 @@ if (file.exists('Clinical_annotation.txt')){
                             "Partial_gene_deletion"
 )
   #------------------------------------------------------------------------------#
-  Onco <-  read.maf(maf = maf, 
-                    verbose=T,
-                    vc_nonSyn = VariantClassification,
-                    clinicalData = Clinical_annotation)
-  # Filtered_Onco <-  read.maf(maf = filtered_maf,
-  #                   verbose=T,
-  #                   vc_nonSyn = VariantClassification,
-  #                   clinicalData = Clinical_annotation)
+  if(get_option("removeNonMutated") == "yes"){
+    Onco <-  read.maf(maf = filtered_maf, 
+                      verbose=T,
+                      removeDuplicatedVariants=F,
+                      vc_nonSyn = VariantClassification,
+                      clinicalData = Clinical_annotation)
+  } else{
+    Onco <-  read.maf(maf = maf, 
+                      verbose=T,
+                      removeDuplicatedVariants=F,
+                      vc_nonSyn = VariantClassification,
+                      clinicalData = Clinical_annotation)
+  }
   #------------------------------------------------------------------------------#
   output_name <- paste0(Name, "_Onco")
   write.mafSummary(maf = Onco, basename = output_name)
-  #------------------------------------------------------------------------------#
-  options_df <- read_excel("oncoplot_options_v2.xlsx", col_names = TRUE)
-  options_list <- setNames(as.list(options_df$Value), options_df$Options)
-  get_option <- function(option_name) {
-    return(options_list[[option_name]])
-  }
   #------------------------------------------------------------------------------#
   Oncoprint_color <- c(
     Frame_Shift_Del = get_option("Frame_Shift_Del"),
@@ -217,12 +222,12 @@ if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   current_date <- format(Sys.Date(), "%y%m%d")
   oncoplot_filename <- paste0(current_date,"_",Name, "_oncoplot.pdf")
-  if(get_option("removeNonMutated") == "yes"){
-    removeNonMutated <- TRUE
-  } else{
-    removeNonMutated <- FALSE
-  }
-  
+  # if(get_option("removeNonMutated") == "yes"){
+  #   removeNonMutated <- TRUE
+  # } else{
+  #   removeNonMutated <- FALSE
+  # }
+  # 
   if(get_option("writeMatrix") == "yes"){
     writeMatrix <- TRUE
   } else{
@@ -234,14 +239,14 @@ if (file.exists('Clinical_annotation.txt')){
   } else{
     showTumorSampleBarcodes <- FALSE
   }
-  
   pdf(oncoplot_filename)
   oncoplot(maf = Onco,
            genes = top_genes,
            colors = Oncoprint_color,
            leftBarLims = c(0,100),
+           leftBarData = Genes,
            fontSize = as.numeric(get_option("fontSize")),
-           removeNonMutated <- removeNonMutated,
+           fill = FALSE,
            writeMatrix = writeMatrix,
            showTumorSampleBarcodes = showTumorSampleBarcodes,
            legendFontSize = 1,
@@ -308,9 +313,16 @@ if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   maf <- read.table(output_file, sep='\t', header=TRUE)
   maf[maf == ""] <- NA
+  filtered_maf <- maf[!is.na(maf$Hugo_Symbol) & maf$Hugo_Symbol != "NA", ]
   # filtered_maf <- maf[apply(maf, 1, function(row) all(row != "." & !is.na(row))), ]
   # Clinical_annotation <- read.table('Clinical_annotation.txt', sep='\t', header=T)
   current_date <- format(Sys.Date(), "%y%m%d")
+  #------------------------------------------------------------------------------#
+  options_df <- read_excel("oncoplot_options_v2.xlsx", col_names = TRUE)
+  options_list <- setNames(as.list(options_df$Value), options_df$Options)
+  get_option <- function(option_name) {
+    return(options_list[[option_name]])
+  }
   #------------------------------------------------------------------------------#
   VariantClassification = c("Frame_Shift_Del",
                             "Frame_Shift_Ins",
@@ -338,21 +350,22 @@ if (file.exists('Clinical_annotation.txt')){
                             "Partial_gene_deletion"
   )
   #------------------------------------------------------------------------------#
-  Onco <-  read.maf(maf = maf, 
-                    verbose=T,
-                    vc_nonSyn = VariantClassification)
-  # Filtered_Onco <-  read.maf(maf = filtered_maf, 
-  #                   verbose=T,
-  #                   vc_nonSyn = VariantClassification)
+  if(get_option("removeNonMutated") == "yes"){
+    Onco <-  read.maf(maf = filtered_maf, 
+                      verbose=T,
+                      removeDuplicatedVariants=F,
+                      vc_nonSyn = VariantClassification,
+                      clinicalData = Clinical_annotation)
+  } else{
+    Onco <-  read.maf(maf = maf, 
+                      verbose=T,
+                      removeDuplicatedVariants=F,
+                      vc_nonSyn = VariantClassification,
+                      clinicalData = Clinical_annotation)
+  }
   #------------------------------------------------------------------------------#
   output_name <- paste0(Name, "_Onco")
   write.mafSummary(maf = Onco, basename = output_name)
-  #------------------------------------------------------------------------------#
-  options_df <- read_excel("oncoplot_options_v2.xlsx", col_names = TRUE)
-  options_list <- setNames(as.list(options_df$Value), options_df$Options)
-  get_option <- function(option_name) {
-    return(options_list[[option_name]])
-  }
   #------------------------------------------------------------------------------#
   Oncoprint_color <- c(
     Frame_Shift_Del = get_option("Frame_Shift_Del"),
@@ -422,12 +435,12 @@ if (file.exists('Clinical_annotation.txt')){
   #------------------------------------------------------------------------------#
   current_date <- format(Sys.Date(), "%y%m%d")
   oncoplot_filename <- paste0(current_date,"_",Name, "_oncoplot.pdf")
-  if(get_option("removeNonMutated") == "yes"){
-    removeNonMutated <- TRUE
-  } else{
-    removeNonMutated <- FALSE
-  }
-  
+  # if(get_option("removeNonMutated") == "yes"){
+  #   removeNonMutated <- TRUE
+  # } else{
+  #   removeNonMutated <- FALSE
+  # }
+  # 
   if(get_option("writeMatrix") == "yes"){
     writeMatrix <- TRUE
   } else{
@@ -445,8 +458,9 @@ if (file.exists('Clinical_annotation.txt')){
            genes = top_genes,
            colors = Oncoprint_color,
            leftBarLims = c(0,100),
+           leftBarData = Genes,
            fontSize = as.numeric(get_option("fontSize")),
-           removeNonMutated <- removeNonMutated,
+           fill = F,
            writeMatrix = writeMatrix,
            showTumorSampleBarcodes = showTumorSampleBarcodes,
            legendFontSize = 1,

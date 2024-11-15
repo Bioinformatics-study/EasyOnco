@@ -215,7 +215,7 @@ def run() :
                 except Exception as e:
                     log_file.write(f'Error file: {File}\t({now.strftime("%Y-%m-%d %H:%M:%S")})\n')
                     raise
-    Sample_Names = [x.split('.xlsx')[0] for x in args.input]
+    Sample_Names = [x.split('.')[0] for x in args.input]
     VariantO = list(MAF['Tumor_Sample_Barcode'].unique())
     VariantX = [x for x in Sample_Names if x not in VariantO]
     for variantx in VariantX :

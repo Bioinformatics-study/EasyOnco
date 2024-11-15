@@ -35,7 +35,7 @@ def mkMAF(file, args, path) :
         tmp['End_Position'] = tmp['chrom.pos'].apply(lambda x: x.split(':')[1].split('-')[1] if isinstance(x, str) and ':' in x else "")
         tmp['End_Position'] = pd.to_numeric(tmp['End_Position'], errors='coerce')
         
-        tmp['Tumor_Sample_Barcode'] = file.split('.xlsx')[0]
+        tmp['Tumor_Sample_Barcode'] = file.split('.')[0]
         tmp['Variant_Classification'] = ""
         tmp['Variant_Type'] = ""
         for i in range(len(tmp['HGVSc'])) :
@@ -50,9 +50,9 @@ def mkMAF(file, args, path) :
                         match = re.match(UTR_pattern, tmp['HGVSc'].iloc[i])
                         if match :
                             if match.group('dash'):
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5_prime_UTR_variant"
                             elif match.group('star') :
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3_prime_UTR_variant"
                             elif match.group('one_dash') :
                                 tmp.loc[tmp.index[i], 'Variant_Classification'] = "Promoter_variant"
                         else :
@@ -81,9 +81,9 @@ def mkMAF(file, args, path) :
                         match = re.match(UTR_pattern, tmp['HGVSc'].iloc[i])
                         if match :
                             if match.group('dash'):
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5_prime_UTR_variant"
                             elif match.group('star') :
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3_prime_UTR_variant"
                             elif match.group('one_dash') :
                                 tmp.loc[tmp.index[i], 'Variant_Classification'] = "Promoter_variant"
                         else :
@@ -111,9 +111,9 @@ def mkMAF(file, args, path) :
                         match = re.match(UTR_pattern, tmp['HGVSc'].iloc[i])
                         if match :
                             if match.group('dash'):
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5_prime_UTR_variant"
                             elif match.group('star') :
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3_prime_UTR_variant"
                             elif match.group('one_dash') :
                                 tmp.loc[tmp.index[i], 'Variant_Classification'] = "Promoter_variant"
                         else :
@@ -141,9 +141,9 @@ def mkMAF(file, args, path) :
                         match = re.match(UTR_pattern, tmp['HGVSc'].iloc[i])
                         if match :
                             if match.group('dash'):
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5_prime_UTR_variant"
                             elif match.group('star') :
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3_prime_UTR_variant"
                             elif match.group('one_dash') :
                                 tmp.loc[tmp.index[i], 'Variant_Classification'] = "Promoter_variant"
                         else :
@@ -171,9 +171,9 @@ def mkMAF(file, args, path) :
                         match = re.match(UTR_pattern, tmp['HGVSc'].iloc[i])
                         if match :
                             if match.group('dash'):
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "5_prime_UTR_variant"
                             elif match.group('star') :
-                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3'_UTR_variant"
+                                tmp.loc[tmp.index[i], 'Variant_Classification'] = "3_prime_UTR_variant"
                             elif match.group('one_dash') :
                                 tmp.loc[tmp.index[i], 'Variant_Classification'] = "Promoter_variant"
                         else :
@@ -190,7 +190,7 @@ def mkMAF(file, args, path) :
                 else :
                     tmp.loc[tmp.index[i], 'Variant_Classification'] = 'Duplication'
                 
-        tmp['Tumor_Sample_Barcode'] = file.split('.')[0]
+        # tmp['Tumor_Sample_Barcode'] = file.split('.')[0]
         tmp.rename(columns={'HGVSp':'Protein_Change'}, inplace = True)
         tmp['i_TumorVAF_WU'] = pd.to_numeric(tmp['i_TumorVAF_WU'])
         tmp = tmp.assign(i_TumorVAF_WU=(tmp['i_TumorVAF_WU'] * 100).round(4))
@@ -226,7 +226,7 @@ def run() :
     if args.mafonly == 'n' :
         EasyOnco_path = str(__file__).split('/')[:-1]
         EasyOnco_path = '/'.join(EasyOnco_path)
-        command = f'Rscript {EasyOnco_path}/Oncoplotter_v2.R {args.output}'
+        command = f'Rscript {EasyOnco_path}/Oncoplotter_v3.R {args.output}'
         os.system(command)
     else :
         pass
@@ -247,7 +247,7 @@ if __name__ == '__main__' :
     if args.easyonco :
         EasyOnco_path = str(__file__).split('/')[:-1]
         EasyOnco_path = '/'.join(EasyOnco_path)
-        command = f'Rscript {EasyOnco_path}/Oncoplotter_v2.R {args.easyonco}'
+        command = f'Rscript {EasyOnco_path}/Oncoplotter_v3.R {args.easyonco}'
         os.system(command)
     else :
         run()
